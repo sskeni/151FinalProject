@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityOSC;
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class PlayerController : MonoBehaviour
     private float rotationY;
     private float xLock = 90f;
 
+    private bool heightThresh1;
+    private bool heightThresh2;
+    private bool heightThresh3;
     private bool grappled;
     private bool swinging;
 
@@ -55,17 +59,22 @@ public class PlayerController : MonoBehaviour
         Cursor.visible = false;
     }
 
+    void Start()
+    {
+        Application.runInBackground = true;
+
+        OSCHandler.Instance.Init();
+        OSCHandler.Instance.SendMessageToClient("pd", "/unity", "ready");
+        OSCHandler.Instance.SendMessageToClient("pd", "/unity/height", 0);
+    }
+
     void Update()
     {
         DrawRopes();
         Rotate();
         Grapple();
         Swing();
-        /*if(!grappled && !swinging)
-        {
-            Move();
-            Jump();
-        }*/
+        SendHeights();
         ApplyMoreGravity();
     }
 
@@ -117,6 +126,7 @@ public class PlayerController : MonoBehaviour
             {
                 grappleTarget = hit.point;
                 grappled = true;
+                OSCHandler.Instance.SendMessageToClient("pd", "/unity", "hook");
             }
         }
 
@@ -210,5 +220,54 @@ public class PlayerController : MonoBehaviour
         {
             body.AddForce(Physics.gravity * (fallMultiplier - 1) * Time.deltaTime);
         }
+    }
+
+    private void SendHeights()
+    {
+        float currHeight = transform.position.y;
+        // Going above thresholds
+        if (currHeight > 80 && !heightThresh1)
+        {
+            OSCHandler.Instance.SendMessageToClient("pd", "/unity/height", 80);
+            heightThresh1 = true;
+        }
+        if (currHeight > 320 && !heightThresh2)
+        {
+            OSCHandler.Instance.SendMessageToClient("pd", "/unity/height", 320);
+            heightThresh2 = true;
+        }
+        if (currHeight > 500 && !heightThresh3)
+        {
+            OSCHandler.Instance.SendMessageToClient("pd", "/unity/height", 500);
+            heightThresh3 = true;
+        }
+
+        // Going below thresholds
+        if (currHeight < 80 && heightThresh1)
+        {
+            OSCHandler.Instance.SendMessageToClient("pd", "/unity/height", 0);
+            heightThresh1 = false;
+        }
+        if (currHeight < 320 && heightThresh2)
+        {
+            OSCHandler.Instance.SendMessageToClient("pd", "/unity/height", 80);
+            heightThresh2 = false;
+        }
+        if (currHeight < 500 && heightThresh3)
+        {
+            OSCHandler.Instance.SendMessageToClient("pd", "/unity/height", 320);
+            heightThresh3 = false;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        OSCHandler.Instance.SendMessageToClient("pd", "/unity", "colwall");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        OSCHandler.Instance.SendMessageToClient("pd", "/unity", "pickup");
+        Destroy(other.gameObject);
     }
 }
