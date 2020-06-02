@@ -168,6 +168,7 @@ public class PlayerController : MonoBehaviour
                 body.freezeRotation = false;
                 swingTarget = hit.point;
                 swinging = true;
+                OSCHandler.Instance.SendMessageToClient("pd", "/unity", "hook");
 
                 joint = gameObject.AddComponent<ConfigurableJoint>();
                 joint.anchor = transform.InverseTransformPoint(swingTarget);
