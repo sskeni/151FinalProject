@@ -2,7 +2,7 @@
 #X text 192 245 creation arguments are OSC address;
 #X text 192 221 set message to change OSC address;
 #X floatatom 47 181 5 0 0 0 - - -;
-#N canvas 371 116 958 966 oscReceive 0;
+#N canvas 371 116 958 966 oscReceive 1;
 #X obj 55 184 netreceive -u -b;
 #X msg 78 143 listen 0;
 #X text 152 143 stop listening;
@@ -41,7 +41,7 @@
 #X msg 241 496 1;
 #X msg 353 486 1;
 #X msg 436 489 1;
-#X obj 40 489 select 0 100 300 500;
+#X obj 40 489 select 0 80 320 500;
 #X connect 0 0 6 0;
 #X connect 0 0 8 0;
 #X connect 1 0 0 0;
@@ -104,7 +104,7 @@
 #X obj 47 288 s oscOut;
 #X text 151 156 Send defaults to localhost:8001;
 #X text 151 127 Receive defaults to localhost:8000;
-#N canvas -9 -9 1920 976 soundClip 0;
+#N canvas 246 82 1920 976 soundClip 0;
 #X obj 13 13 loadbang;
 #X obj 36 170 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
